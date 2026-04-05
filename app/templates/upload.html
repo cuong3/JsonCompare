@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}JsonCompare — Upload{% endblock %}
+{% block content %}
+<h1>JsonCompare</h1>
+
+{% if error %}
+<div class="error">{{ error }}</div>
+{% endif %}
+
+<form class="upload-form" action="/compare" method="post" enctype="multipart/form-data">
+  <div class="form-group">
+    <label for="left_file">Left (old)</label>
+    <input type="file" id="left_file" name="left_file" accept=".json,application/json" required>
+  </div>
+
+  <div class="form-group">
+    <label for="right_file">Right (new)</label>
+    <input type="file" id="right_file" name="right_file" accept=".json,application/json" required>
+  </div>
+
+  <div class="form-group">
+    <label>Match key fields</label>
+    <div class="key-fields" id="key-fields">
+      {% for f in default_key_fields %}
+      <label><input type="checkbox" name="key_fields" value="{{ f }}" checked><span>{{ f }}</span></label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Show rows</label>
+    <div class="show-filter">
+      <label><input type="radio" name="show" value="all" checked> All</label>
+      <label><input type="radio" name="show" value="changed"> Changed</label>
+      <label><input type="radio" name="show" value="added"> Added</label>
+      <label><input type="radio" name="show" value="removed"> Removed</label>
+    </div>
+  </div>
+
+  <button type="submit">Compare</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// When the left file is selected, parse it to discover all keys and populate checkboxes
+document.getElementById('left_file').addEventListener('change', async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!Array.isArray(data) || data.length === 0) return;
+    const keys = Object.keys(data[0]);
+    const defaults = {{ default_key_fields | tojson }};
+    const container = document.getElementById('key-fields');
+    container.innerHTML = '';
+    keys.forEach(k => {
+      const lbl = document.createElement('label');
+      const inp = document.createElement('input');
+      inp.type = 'checkbox';
+      inp.name = 'key_fields';
+      inp.value = k;
+      if (defaults.includes(k)) inp.checked = true;
+      const span = document.createElement('span');
+      span.textContent = k;
+      lbl.appendChild(inp);
+      lbl.appendChild(span);
+      container.appendChild(lbl);
+    });
+  } catch (_) { /* ignore parse errors here; server will catch them */ }
+});
+</script>
+{% endblock %}

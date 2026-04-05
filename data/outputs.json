@@ -1,0 +1,72 @@
+[
+  {
+    "side": "personal",
+    "category": "DINING",
+    "subcategory": "COFFEE_TEA",
+    "tax_relevant": false,
+    "tax_schedule": null,
+    "confidence_score": 0.7,
+    "reasoning": "HI NRG sounds like a coffee shop or a quick-service food establishment. Given the small amount and the merchant name, it's most likely a personal dining expense for coffee or a snack.",
+    "date": "2026-04-05",
+    "merchant_name": "HI NRG",
+    "amount": 6.0,
+    "teller_category": "card_payment",
+    "description": "HI NRG"
+  },
+  {
+    "side": "personal",
+    "category": "GROCERIES",
+    "subcategory": "GROCERIES",
+    "tax_relevant": false,
+    "tax_schedule": null,
+    "confidence_score": 0.95,
+    "reasoning": "Whole Foods Market is a grocery store, so the transaction is classified as personal groceries.",
+    "date": "2026-04-04",
+    "merchant_name": "WHOLE FOODS MARKET",
+    "amount": 80.95,
+    "teller_category": "card_payment",
+    "description": "WHOLE FOODS MARKET"
+  },
+  {
+    "side": "personal",
+    "category": "GROCERIES",
+    "subcategory": "GROCERIES",
+    "tax_relevant": false,
+    "tax_schedule": null,
+    "confidence_score": 0.95,
+    "reasoning": "H MART is a grocery store, and the purchase amount is typical for groceries. This is a personal expense.",
+    "date": "2026-04-04",
+    "merchant_name": "H MART",
+    "amount": 210.13,
+    "teller_category": "card_payment",
+    "description": "H MART"
+  },
+  {
+    "side": "personal",
+    "category": "SHOPPING",
+    "subcategory": "GENERAL_MERCHANDISE",
+    "tax_relevant": false,
+    "tax_schedule": null,
+    "confidence_score": 0.5,
+    "reasoning": "Amazon transactions are often personal unless specified. Without more information, it's safer to categorize as personal shopping. The bank description 'AMAZON MARKEPLACE NA PA' is generic and doesn't provide business context.",
+    "date": "2026-04-04",
+    "merchant_name": "AMAZON",
+    "amount": 8.68,
+    "teller_category": "card_payment",
+    "description": "AMAZON MARKEPLACE NA PA"
+  },
+  {
+    "side": "personal",
+    "category": "DINING",
+    "subcategory": "RESTAURANTS",
+    "tax_relevant": false,
+    "tax_schedule": null,
+    "confidence_score": 0.9,
+    "reasoning": "The merchant 'THAI NGHIEP KY MI GIA RESTAURA' clearly indicates a restaurant, which is a personal dining expense.",
+    "date": "2026-04-04",
+    "merchant_name": "THAI NGHIEP",
+    "amount": 76.5,
+    "teller_category": "card_payment",
+    "description": "THAI NGHIEP KY MI GIA RESTAURA"
+  }
+]

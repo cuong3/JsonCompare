@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}JsonCompare — Results{% endblock %}
+{% block content %}
+<a href="/" class="back-link">&larr; New comparison</a>
+
+<div class="topbar">
+  <div class="files">{{ left_name }} &harr; {{ right_name }}</div>
+  <div class="badges">
+    <span class="badge matched">{{ result.stats.matched }} matched</span>
+    <span class="badge changed">{{ result.stats.changed }} changed</span>
+    <span class="badge added">{{ result.stats.added }} added</span>
+    <span class="badge removed">{{ result.stats.removed }} removed</span>
+  </div>
+</div>
+
+<!-- Stats panel -->
+<details class="stats-panel" open>
+  <summary>Statistics</summary>
+  <div class="stats-body">
+    {% if result.stats.changed_by_field %}
+    <div class="stat-section">
+      <h3>Changes by field</h3>
+      <ul class="bar-list">
+        {% set max_count = result.stats.changed_by_field.values() | list | max %}
+        {% for field, count in result.stats.changed_by_field.items() %}
+        <li>
+          <span style="min-width:130px">{{ field }}</span>
+          <span class="bar" style="width: {{ (count / max_count * 100) | int }}px"></span>
+          <span>{{ count }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% if result.stats.category_transitions %}
+    <div class="stat-section">
+      <h3>Category transitions</h3>
+      <table class="transition-table">
+        <tr><th>Transition</th><th>Count</th></tr>
+        {% for transition, count in result.stats.category_transitions.items() %}
+        <tr><td>{{ transition }}</td><td>{{ count }}</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% endif %}
+
+    {% if result.stats.confidence_delta %}
+    <div class="stat-section">
+      <h3>Confidence score delta</h3>
+      <div class="conf-stats">
+        <span>mean:</span> {{ result.stats.confidence_delta.mean }}<br>
+        <span>median:</span> {{ result.stats.confidence_delta.median }}<br>
+        <span>min:</span> {{ result.stats.confidence_delta.min }}<br>
+        <span>max:</span> {{ result.stats.confidence_delta.max }}<br>
+        <span>rows with change:</span> {{ result.stats.confidence_delta.n }}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if not result.stats.changed_by_field and not result.stats.category_transitions and not result.stats.confidence_delta %}
+    <div class="stat-section" style="color: var(--text-dim); font-style: italic;">No differences found.</div>
+    {% endif %}
+  </div>
+</details>
+
+<!-- Row grid -->
+{% if result.rows %}
+  {% for row in result.rows %}
+  <div class="row-card {{ row.type }}{% if row.changed %} changed{% endif %}">
+
+    {# Identity bar — show from whichever side is available #}
+    {% set src = row.left or row.right %}
+    <div class="row-identity">
+      {% for key in src.keys() %}
+        {% if key not in output_fields %}
+        <span><span class="field-name">{{ key }}:</span> <span class="field-val">{{ src[key] }}</span></span>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="row-sides">
+      {# Left side #}
+      <div class="row-side">
+        {% if row.left %}
+        <div class="side-label">Old</div>
+        {% for f in output_fields %}
+          {% if f in row.left %}
+          <div class="field-row">
+            <span class="fname">{{ f }}</span>
+            {% if f == "reasoning" %}
+            <details>
+              <summary class="{% if f in row.diffs %}diff-old{% endif %}">
+                {{ row.left[f][:60] }}{% if row.left[f] | length > 60 %}...{% endif %}
+              </summary>
+              <div class="reasoning-text {% if f in row.diffs %}diff-old{% endif %}">{{ row.left[f] }}</div>
+            </details>
+            {% else %}
+            <span class="fval {% if f in row.diffs %}diff-old{% endif %}">{{ row.left[f] }}</span>
+            {% endif %}
+          </div>
+          {% endif %}
+        {% endfor %}
+        {% else %}
+        <div class="empty-side">Not present in left file</div>
+        {% endif %}
+      </div>
+
+      {# Right side #}
+      <div class="row-side">
+        {% if row.right %}
+        <div class="side-label">New</div>
+        {% for f in output_fields %}
+          {% if f in row.right %}
+          <div class="field-row">
+            <span class="fname">{{ f }}</span>
+            {% if f == "reasoning" %}
+            <details>
+              <summary class="{% if f in row.diffs %}diff-new{% endif %}">
+                {{ row.right[f][:60] }}{% if row.right[f] | length > 60 %}...{% endif %}
+              </summary>
+              <div class="reasoning-text {% if f in row.diffs %}diff-new{% endif %}">{{ row.right[f] }}</div>
+            </details>
+            {% else %}
+            <span class="fval {% if f in row.diffs %}diff-new{% endif %}">{{ row.right[f] }}</span>
+            {% endif %}
+          </div>
+          {% endif %}
+        {% endfor %}
+        {% else %}
+        <div class="empty-side">Not present in right file</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+<div class="no-rows">No rows to display for the "{{ show }}" filter.</div>
+{% endif %}
+{% endblock %}
