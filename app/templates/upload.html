@@ -28,6 +28,15 @@
   </div>
 
   <div class="form-group">
+    <label>Fields to compare (change detection)</label>
+    <div class="key-fields" id="output-fields">
+      {% for f in default_output_fields %}
+      <label><input type="checkbox" name="output_fields" value="{{ f }}" checked><span>{{ f }}</span></label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="form-group">
     <label>Show rows</label>
     <div class="show-filter">
       <label><input type="radio" name="show" value="all" checked> All</label>
@@ -43,7 +52,27 @@
 
 {% block scripts %}
 <script>
-// When the left file is selected, parse it to discover all keys and populate checkboxes
+const defaultKeys = {{ default_key_fields | tojson }};
+const defaultOutputs = {{ default_output_fields | tojson }};
+
+function buildCheckboxes(container, name, keys, defaults) {
+  container.innerHTML = '';
+  keys.forEach(k => {
+    const lbl = document.createElement('label');
+    const inp = document.createElement('input');
+    inp.type = 'checkbox';
+    inp.name = name;
+    inp.value = k;
+    if (defaults.includes(k)) inp.checked = true;
+    const span = document.createElement('span');
+    span.textContent = k;
+    lbl.appendChild(inp);
+    lbl.appendChild(span);
+    container.appendChild(lbl);
+  });
+}
+
+// When the left file is selected, parse it to discover all keys and populate both checkbox groups
 document.getElementById('left_file').addEventListener('change', async function(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -52,22 +81,8 @@ document.getElementById('left_file').addEventListener('change', async function(e
     const data = JSON.parse(text);
     if (!Array.isArray(data) || data.length === 0) return;
     const keys = Object.keys(data[0]);
-    const defaults = {{ default_key_fields | tojson }};
-    const container = document.getElementById('key-fields');
-    container.innerHTML = '';
-    keys.forEach(k => {
-      const lbl = document.createElement('label');
-      const inp = document.createElement('input');
-      inp.type = 'checkbox';
-      inp.name = 'key_fields';
-      inp.value = k;
-      if (defaults.includes(k)) inp.checked = true;
-      const span = document.createElement('span');
-      span.textContent = k;
-      lbl.appendChild(inp);
-      lbl.appendChild(span);
-      container.appendChild(lbl);
-    });
+    buildCheckboxes(document.getElementById('key-fields'), 'key_fields', keys, defaultKeys);
+    buildCheckboxes(document.getElementById('output-fields'), 'output_fields', keys, defaultOutputs);
   } catch (_) { /* ignore parse errors here; server will catch them */ }
 });
 </script>

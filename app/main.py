@@ -26,6 +26,7 @@ def _parse_upload(file: UploadFile) -> list[dict]:
 async def upload_page(request: Request):
     return templates.TemplateResponse(request, "upload.html", {
         "default_key_fields": DEFAULT_KEY_FIELDS,
+        "default_output_fields": OUTPUT_FIELDS,
     })
 
 
@@ -35,6 +36,7 @@ async def compare_page(
     left_file: UploadFile = File(...),
     right_file: UploadFile = File(...),
     key_fields: list[str] = Form(list(DEFAULT_KEY_FIELDS)),
+    output_fields: list[str] = Form(list(OUTPUT_FIELDS)),
     show: str = Form("all"),
 ):
     try:
@@ -44,9 +46,10 @@ async def compare_page(
         return templates.TemplateResponse(request, "upload.html", {
             "error": str(exc),
             "default_key_fields": DEFAULT_KEY_FIELDS,
+            "default_output_fields": OUTPUT_FIELDS,
         })
 
-    result = compare_files(left, right, tuple(key_fields))
+    result = compare_files(left, right, tuple(key_fields), tuple(output_fields))
 
     # Apply show filter
     if show == "changed":
@@ -59,7 +62,7 @@ async def compare_page(
 
     return templates.TemplateResponse(request, "compare.html", {
         "result": result,
-        "output_fields": OUTPUT_FIELDS,
+        "output_fields": tuple(output_fields),
         "left_name": left_file.filename,
         "right_name": right_file.filename,
         "show": show,
@@ -71,6 +74,7 @@ async def api_compare(
     left_file: UploadFile = File(...),
     right_file: UploadFile = File(...),
     key_fields: list[str] = Form(list(DEFAULT_KEY_FIELDS)),
+    output_fields: list[str] = Form(list(OUTPUT_FIELDS)),
 ):
     try:
         left = _parse_upload(left_file)
@@ -78,5 +82,5 @@ async def api_compare(
     except (json.JSONDecodeError, ValueError) as exc:
         return JSONResponse({"error": str(exc)}, status_code=400)
 
-    result = compare_files(left, right, tuple(key_fields))
+    result = compare_files(left, right, tuple(key_fields), tuple(output_fields))
     return result

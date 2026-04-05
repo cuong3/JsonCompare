@@ -128,13 +128,14 @@ def compare_files(
     left: list[dict],
     right: list[dict],
     key_fields: tuple[str, ...] = DEFAULT_KEY_FIELDS,
+    output_fields: tuple[str, ...] = OUTPUT_FIELDS,
 ) -> dict:
     """High-level entry point. Returns everything the template needs."""
     matched, only_left, only_right = pair_rows(left, right, key_fields)
 
     rows = []
     for lrow, rrow in matched:
-        diffs = diff_row(lrow, rrow)
+        diffs = diff_row(lrow, rrow, output_fields)
         rows.append({
             "type": "matched",
             "left": lrow,
@@ -147,6 +148,6 @@ def compare_files(
     for row in only_right:
         rows.append({"type": "added", "left": None, "right": row, "diffs": {}, "changed": True})
 
-    stats = compute_stats(matched, only_left, only_right)
+    stats = compute_stats(matched, only_left, only_right, output_fields)
 
-    return {"rows": rows, "stats": stats, "key_fields": list(key_fields)}
+    return {"rows": rows, "stats": stats, "key_fields": list(key_fields), "output_fields": list(output_fields)}
